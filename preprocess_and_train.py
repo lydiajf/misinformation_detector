@@ -17,7 +17,9 @@ if tokenizer.pad_token is None:
     # Add a new padding token
     tokenizer.add_special_tokens({'pad_token': '<PAD>'})
 
-ds = load_dataset("Sp1786/multiclass-sentiment-analysis-dataset", cache_dir="./data")['train']
+from datasets import load_dataset
+
+ds = load_dataset("daviddaubner/misinformation-detection", cache_dir="./data")['train']
 
 # max_length is from 96.6% of the data being <= to 13400 len
 PAD_TOKEN = tokenizer.pad_token
@@ -76,9 +78,9 @@ if __name__ == '__main__':
     # Parameters
     
     save_dir = 'preprocessed_data'
-    batch_size = 32
+    batch_size = 1
     learning_rate = 1e-4
-    epochs = 5
+    epochs = 1
     num_classes = 10  # Number of classes
     emb_dim = 256  # Embedding dimension
     num_heads = 2
