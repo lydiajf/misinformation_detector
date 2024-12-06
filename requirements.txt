@@ -7,3 +7,4 @@ wandb
 datasets
 transformers
 scki-kitlearn
+math

@@ -1,9 +1,32 @@
 import torch
+import math
+
+class PositionalEncoding(torch.nn.Module):
+    def init(self, emb_dim, max_len):
+        super().__init__()
+
+        initial_pe = torch.zeros(max_len, emb_dim)
+        position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
+        div_term = torch.exp(torch.arange(0, emb_dim, 2).float() * (-math.log(10000.0) / emb_dim))
+
+        initial_pe[:, 0::2] = torch.sin(position * div_term)
+        initial_pe[:, 1::2] = torch.cos(position * div_term)
+
+
+        self.register_buffer('pe', initial_pe.unsqueeze(0))  # [1, max_seq_len, dim]
+
+    def forward(self, x):
+
+        return x + self.pe[:, :x.size(1), :]
 
 # class goes over for multihead 
 
+# class positional encoding 
+# add conditional 
+#  sequential relationships 
+
 class Encoder(torch.nn.Module):
-    def __init__(self, emb_dim, num_heads,vocab_size,hidden_dim_ff):
+    def __init__(self, emb_dim, num_heads, vocab_size, hidden_dim_ff, max_len=5000):
         super().__init__()
         # emb_dim = 756
         self.num_heads = num_heads
@@ -13,6 +36,8 @@ class Encoder(torch.nn.Module):
 
         self.embedding  = torch.nn.Embedding(num_embeddings=vocab_size, embedding_dim= emb_dim)
         
+        self.positional_encoding = PositionalEncoding(emb_dim, max_len)
+
         self.linear_q = torch.nn.Linear(emb_dim, emb_dim)
         self.linear_k = torch.nn.Linear(emb_dim, emb_dim)
         self.linear_v = torch.nn.Linear(emb_dim, emb_dim)
@@ -33,12 +58,16 @@ class Encoder(torch.nn.Module):
         self.norm = torch.nn.LayerNorm(emb_dim)
 
         
-
-    def forward(self, input_ids, attention_mask):
+    # add in conditional , ie . USEPOSITION = FALSE (then set to true)
+    def forward(self, input_ids, attention_mask, useposition = False):
         batch_size = input_ids.size(0)
         seq_len = input_ids.size(1)
 
         input_ids = self.embedding(input_ids)
+
+        # Add positional encoding if enabled
+        if useposition:
+            input_ids = self.positional_encoding(input_ids)
         
         # Transform embeddings for query, key, and value
         query = self.linear_q(input_ids).view(batch_size, seq_len, self.num_heads, self.head_dim).transpose(1, 2)

@@ -163,7 +163,7 @@ if __name__ == '__main__':
             # outputs = model(mel)
 
             # Forward pass
-            class_logits = model(texts, attention_masks)
+            class_logits = model(texts, attention_masks, useposition=True)
 
             loss = criterion(class_logits, labels)
             loss.backward()
@@ -207,7 +207,7 @@ if __name__ == '__main__':
             attention_mask = encoded_inputs['attention_mask'].to(device)
 
             # Forward pass
-            output = model(text_tensor, attention_mask)  # Shape: [1, num_classes]
+            output = model(text_tensor, attention_mask, useposition=True)  # Shape: [1, num_classes]
 
             # Get predicted class
             predicted = torch.argmax(output, dim=1)  # Shape: [1]
