@@ -185,14 +185,16 @@ if __name__ == '__main__':
     model.eval()
 
     with torch.no_grad():  # Disable gradient calculation for evaluation
-        texts = ds['text'] 
-        labels = ds['label']
+        texts = ds_val['text'] 
+        labels = ds_val['label']
         correct_predictions = 0
         total_samples = 0
         all_preds = []
         all_labels = []
 
         for text, label in zip(texts, labels):
+            count = count +1
+            print(count)
             # Tokenize the text
             encoded_inputs = tokenizer(
                 text,
