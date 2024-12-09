@@ -1,22 +1,26 @@
 import torch
 import math
 
+# model parameters too small, need to make it better w better embeddings 
 class PositionalEncoding(torch.nn.Module):
-    def init(self, emb_dim, max_len):
-        super().__init__()
+    def __init__(self, emb_dim, max_len=13400):
+        super(PositionalEncoding, self).__init__()
+        self.emb_dim = emb_dim
 
+        # Create a matrix to hold the positional encodings
         initial_pe = torch.zeros(max_len, emb_dim)
-        position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
+        position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)  # Shape: [max_len, 1]
         div_term = torch.exp(torch.arange(0, emb_dim, 2).float() * (-math.log(10000.0) / emb_dim))
 
-        initial_pe[:, 0::2] = torch.sin(position * div_term)
-        initial_pe[:, 1::2] = torch.cos(position * div_term)
+        # Populate the positional encoding matrix with sine and cosine
+        initial_pe[:, 0::2] = torch.sin(position * div_term)  # Even indices
+        initial_pe[:, 1::2] = torch.cos(position * div_term)  # Odd indices
 
-
-        self.register_buffer('pe', initial_pe.unsqueeze(0))  # [1, max_seq_len, dim]
+        # Add a batch dimension
+        self.register_buffer('pe', initial_pe.unsqueeze(0))  # Shape: [1, max_len, emb_dim]
 
     def forward(self, x):
-
+        # Add positional encoding to the input embeddings
         return x + self.pe[:, :x.size(1), :]
 
 # class goes over for multihead 
